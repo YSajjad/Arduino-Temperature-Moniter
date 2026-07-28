@@ -1,8 +1,7 @@
 # Temperature Monitor System with IoT Integration
 
 ## Overview (of V2)
-This project is a temperature monitoring system using the DS18B20 digital temperature sensor and the ESP32, it is logged live to ThingSpeak. This project is currently unfinished, version two is currently in development, WiFi logging is fully operational whilst LCD screen intergration is planned to be implemented.
-
+This project is a temperature monitoring system using the DS18B20 digital temperature sensor and the ESP32, it is logged live to ThingSpeak.
 Link to ThingSpeak: https://thingspeak.mathworks.com/channels/3428297
 
 In version one the Arduino UNO is used, it is replaced by the ESP32 in version two due to the Arduino Uno lacking WiFi capabilities. Version one did not include WiFi logging or a screen.
@@ -22,7 +21,7 @@ Decoupling is implemented using an electrolytic and ceramic capacitor for low an
 - Breadboard and jumper wires
 
 ## Breadboard V2
-Note that the LCD has yet to be implemented, all other components mentiond above are included.
+Note that this picture is outdated, the most recent version includes the LCD. The picture will be updated.
 Note that the DS18B20 sensor used has a built in pull up resistor hence no pull up resistor is included on the breadboard.
 ![Breadboard](src/V2_online_sensor/V2TemperatureSensor.jpeg)
 
