@@ -1,6 +1,8 @@
 #include <OneWire.h>
 #include <DallasTemperature.h> // both libraries needed for the sensor
 
+#include <LiquidCrystal_I2C.h> 
+
 // wifi libraries
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -14,6 +16,9 @@ String apiKey = "";
 // The pin connecting to the data output of the sensor
 OneWire oneWire(OneWireBus);
 DallasTemperature sensors(&oneWire);
+
+// LCD
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // pins for output devices
 const int led = 18;
@@ -53,6 +58,14 @@ void setup() {
 
   pinMode(led,OUTPUT);
   pinMode(piezo,OUTPUT);
+
+  lcd.init();
+  lcd.backlight();
+
+  lcd.setCursor(0,0);
+  lcd.print("Temperature");
+  delay(1500);
+  lcd.clear();
 }
 
 void sendTemp(float temperature) { // sends temperature to thingspeak
@@ -84,7 +97,7 @@ void updateOutputs(float temperature){
   }
 }
 
-bool connectedCheck(float temperature) {
+bool sensorConnectionCheck(float temperature) {
     if (temperature == DEVICE_DISCONNECTED_C) {
         Serial.println("Sensor disconnected");
 
@@ -97,13 +110,25 @@ bool connectedCheck(float temperature) {
 
     return true;
 } 
+void outputScreen(float temperature) {
+
+    lcd.clear();
+
+    lcd.setCursor(0,0);
+
+    lcd.print("Temperature");
+    lcd.setCursor(0,1);
+    lcd.print(temperature);
+    lcd.print((char)223);
+    lcd.print("C");
+}
 
 void loop() {
 
   sensors.requestTemperatures();
   float tempC=sensors.getTempCByIndex(0);// Temperature from sensor
   
-  if (!connectedCheck(tempC)) { // Checks if Sensor s connected
+  if (!sensorConnectionCheck(tempC)) { // Checks if Sensor s connected
     return;
     }
   
@@ -113,7 +138,10 @@ void loop() {
   // Sends temperature to thingspeak
   sendTemp(tempC);
 
+  // Displays temp to LCD
+  outputScreen(tempC);
 
+  
   delay(20000);
 
 }
