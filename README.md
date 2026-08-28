@@ -1,68 +1,52 @@
 # Temperature Monitor System with IoT Integration
 
-## Overview
-This project is a temperature monitoring system using the DS18B20 digital temperature sensor and the ESP32, it is logged live to ThingSpeak. The PCB was created in KiKad. 
-Link to ThingSpeak: https://thingspeak.mathworks.com/channels/3428297
+### Overview
+This project is a temperature monitoring system using the DS18B20 digital temperature sensor and the ESP32, it is logged live to ThingSpeak. The PCB was created in KiCad. 
 
-In version one the Arduino UNO is used, it is replaced by the "freenove ESP32 wroom" in version two due to the Arduino Uno lacking WiFi capabilities. Version one did not include WiFi logging or a screen.
-The OneWire and DallasTemperature libraries are used for the sensor.
-Decoupling is implemented using an electrolytic and ceramic capacitor for low and high frequency noise.
+Link to ThingSpeak: https://thingspeak.mathworks.com/channels/3428295
 
+![Final PCB](hardware/Final_Version/FinalTemperatureSensor.jpeg)
+
+### Components
+The following components are used in this PCB. The 2N2222A transistor is not present in any previous versions 
+
+| Component  | Function |
+| ------------- | ------------- |
+| Freenove ESP32 WROOM  | Manages all components and logic, wifi capabilities allow for live logging to ThingSpeak  |
+| 2x 01x20 female to male header socket | Allows the ESP32 to be plugged onto the PCB |
+| LCD screen with I2C backpack  | Displays current temperature  |
+| 01x04 female to male header socket | Connects the LCD I2C backpack to the PCB  |
+| 4x Male to female jumper wires | Connects to the LCD I2C backpack  |
+| DS18B20 digital temperature sensor  | Measures temperature  |
+| 01x03 screw terminal | holds the VCC, GND and data wires of the DS18B20  |
+| 4.7 KΩ resistor  | Pull up resistor for DS18B20 sensor, is built in to the sensor hence is not in any diagrams  |
+| Piezo | Informs user of specific temperature    |
+| LED & 220Ω resistor  | Informs user of specific temperature  |
+| 1KΩ resistor | Limits current from the ESP32 to a safe level  |
+| 10KΩ resistor| Discharges residual charge of the piezo  |
+| 100 µF electrolytic capacitor  | Stops low frequency noise  |
+| 0.1 µF ceramic capacitor  | Stops high frequency noise  |
+| Male to female jumper wires | Connects to the LCD I2C backpack  |
+| 2N2222A Transistor | Protects the GPIO pin of the ESP32 from the capacitive nature of the piezo  |
 
 ## PCB and Circuit Design
-The ![Circuit Diagram](hardware/esp32TemperatureMonitor.pdf) includes 2 01x20 sockets in order to accommodate the ESP32, with J1 being the left size whilst J2 is the right. On the PCB layout J1 and J2 are 25.4mm apart.
-The 2N2222A transistor is included to protect the GPIO pin the buzzer connects to.
+### Circuit Diagram
+The circuit diagram includes 2 01x20 sockets in order to accommodate the ESP32, with J1 being the left size whilst J2 is the right. On the PCB layout J1 and J2 are 25.4mm apart.
+The 2N2222A transistor is included to protect the GPIO 19 pin, the buzzer symbol is used to represent a piezo, which does not have inductive properties hence no flyback diode is required. J3 represents the LCD screen which makes use of an I2C backpack.
 
-The PCB is 95mm by 80mm with a thickness of 1.6mm.
-![PCB Layout](hardware/TemperatureSensorPCB.png)
+<img width="839" height="824" alt="image" src="https://github.com/user-attachments/assets/805feb32-cce4-4153-9876-04fe3d6b4c39" />
+
+### PCB layout
+The PCB is 95mm by 80mm with a thickness of 1.6mm. J1 and J2 are 25.4mm apart. Components which will have wires attached are placed so that the wires do not get caught on other components. 90 degree turns are avoided to reduce interference.
+The LCD is to be connected via jumper wires to the 01x04 sockets, it is separate as a screen may not be needed constantly for the PCB and hence must be easy to remove, directly plugging and unplugging the screen could cause damage to the PCB and the LCD backpack hence jumper wires are used instead.
+![PCB Layout](hardware/kikad/TemperatureSensorPCB.png)
+
+### Simulation and Final PCB
 
 Below is the 3D KiKad simulation of the PCB layout.
 
-![PCB Layout](hardware/TemperatureSensorPCB3DSimulation.png)
+![PCB Layout Simulation](hardware/kikad/TemperatureSensorPCB3DSimulation.png)
 
-## Components
-The following components are used in this PCB. The 2N2222A transistor is not present in any previous versions 
-- ESP32
-- LCD screen - 2x16
-- DS18B20 digital temperature sensor
-- 4.7 KΩ pull-up resistor (Included in sensor, hence not on diagram)
-- Piezo buzzer
-- 100 µF electrolytic capacitor
-- 0.1 µF ceramic capacitor
-- LED & Current limiting resistor
-- Breadboard and jumper wires
-- 2N2222A Transistor
-- 1KΩ and 10kΩ for transistor network
+Below is the final PCB.
 
-
-## Versions
-The following versions are prototypes before the final PCB was designed
-
-## Breadboard V2
-Note that the DS18B20 sensor used has a built in pull up resistor hence no pull up resistor is included on the breadboard.
-This version did not have a transistor or its accompanying resitors, the piezo connects directly to the GPIO pin.
-![Breadboard](src/V2_online_sensor/V2TemperatureSensorLCD.jpeg)
-
-
-# Version 1 
-
-Version one included the DS18B20 with the arduino UNO, readings were logged to a laptop a piezo and LED the user was informed if temperature exeeded certain thresholds.
-
-## Components for version one
-- Arduino Uno
-- DS18B20 digital temperature sensor
-- 4.7 kΩ pull-up resistor
-- Piezo buzzer
-- 100 µF electrolytic capacitor
-- 0.1 µF ceramic capacitor
-- LED & Current limiting resistor
-- Breadboard and jumper wires
-
-Note that the DS18B20 sensor used has a built in pull up resistor hence no pull up resistor is included on the breadboard.
-![Breadboard](src/v1_local_alarm/V1TemperatureAlarm.jpg)
-
-
-## Initial Diagram
-Made in tinker CAD, note that due to tinker CAD component limitations there is no DS18B20 model hence a TMP36 model is used as a place holder.
-This is the initial concept design and is not accurate to version one
-![Circuit Diagram](docs/Temperature%20Sensor%20V1.png)
+![PCB Layout Final](hardware/Final_Version/PCB.jpeg)
