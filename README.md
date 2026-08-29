@@ -29,6 +29,14 @@ The following components are used in this PCB. The 2N2222A transistor is not pre
 | Male to female jumper wires | Connects to the LCD I2C backpack  |
 | 2N2222A Transistor | Protects the GPIO pin of the ESP32 from the capacitive nature of the piezo  |
 
+
+### Code
+
+The code is non-blocking via the use of millis() meaning output updates and logging can run without blocking the CPU. 
+Structured with global variables corresponding to interval times and output thresholds allows for logic to be quickly alterd.
+Implementation of functions which separate different processes allow for more efficient debugging, improved readability and reuse in other projects. 
+The SDA and SCL default GPIO pins are manually set rectify a routing error in the PCB allowing for the I2C backpack to work.
+
 ## PCB and Circuit Design
 ### Circuit Diagram
 The circuit diagram includes 2 01x20 sockets in order to accommodate the ESP32, with J1 being the left size whilst J2 is the right. On the PCB layout J1 and J2 are 25.4mm apart.
