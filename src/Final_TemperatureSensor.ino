@@ -13,8 +13,15 @@ const char* ssid = "";
 const char* password = "";
 String apiKey = "";
 
-#define OneWireBus 4
-// The pin connecting to the data output of the sensor
+unsigned long previousMillisLogging = 0;
+const unsigned long intervalLogging = 15000;// time interval to send to thingspeak
+
+unsigned long previousMillisSensor = 0 ;
+const unsigned long intervalSensor = 1000;// time interval to update sensor information
+
+float tempC=0.0;//temperature from sensor
+
+#define OneWireBus 4 // The pin connecting to the data output of the sensor
 OneWire oneWire(OneWireBus);
 DallasTemperature sensors(&oneWire);
 
@@ -35,22 +42,7 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  // wifi 
-  Serial.println("Attempting to connect to: ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-
-  Serial.print("ESP32 IP address: ");
-  Serial.println(WiFi.localIP());
+  connectWifi();
 
 
   // input and output devices
@@ -60,7 +52,7 @@ void setup() {
   pinMode(led,OUTPUT);
   pinMode(piezo,OUTPUT);
 
-  Wire.begin(5,22); // setting defaults for I2C
+  Wire.begin(5,22); // setting SDA and SCL
   lcd.init();
   lcd.backlight();
 
@@ -70,7 +62,28 @@ void setup() {
   lcd.clear();
 }
 
+void connectWifi(){//connects to wifi
+
+  Serial.println("Attempting to connect to: ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+}
+void wifiCheck(){// checks if wifi is connected, reconnects if it isnt
+  if (WiFi.status()==WL_CONNECTED){
+    Serial.print("WiFi connected - ESP32 IP address: ");
+    Serial.println(WiFi.localIP());
+    return;
+    }
+  else{
+    connectWifi();
+  }
+}
 void sendTemp(float temperature) { // sends temperature to thingspeak
+
+  if (WiFi.status()!=WL_CONNECTED){
+    return;
+  }
 
   HTTPClient http;
 
@@ -103,6 +116,7 @@ bool sensorConnectionCheck(float temperature) {
     if (temperature == DEVICE_DISCONNECTED_C) {
         Serial.println("Sensor disconnected");
 
+        // turns LED nad piezo off
         digitalWrite(led, LOW);
         noTone(piezo);
 
@@ -124,25 +138,35 @@ void outputScreen(float temperature) {
     lcd.print((char)223);
     lcd.print("C");
 }
+
 void loop() {
-  Serial.println("Running:");
-  sensors.requestTemperatures();
-  float tempC=sensors.getTempCByIndex(0);// Temperature from sensor
+  unsigned long currentMillis=millis();
+
+  //every second
+  if ((currentMillis-previousMillisSensor)>=intervalSensor){
+      previousMillisSensor=currentMillis;
+
+      wifiCheck();
+
+      sensors.requestTemperatures();
+      tempC=sensors.getTempCByIndex(0);// Temperature from sensor
   
-  if (!sensorConnectionCheck(tempC)) { // Checks if Sensor s connected
-    return;
-    }
+      if (!sensorConnectionCheck(tempC)) { // Checks if sensor is not connected
+          return;
+      }
+
+      // Displays temp to LCD  
+      outputScreen(tempC);
+
+      // Output devices logic
+      updateOutputs(tempC);
+  }
+
+  // every 15 seconds
+  if ((currentMillis-previousMillisLogging)>=intervalLogging){
+      previousMillisLogging=currentMillis;
   
-  // Output devices logic
-  updateOutputs(tempC);
-
-  // Sends temperature to thingspeak
-  sendTemp(tempC);
-
-  // Displays temp to LCD
-  outputScreen(tempC);
-
-  
-  delay(20000);
-
+      // Sends temperature to thingspeak
+      sendTemp(tempC);
+  }
 }
