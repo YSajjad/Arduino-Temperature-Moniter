@@ -120,7 +120,6 @@ bool sensorConnectionCheck(float temperature) {
         digitalWrite(led, LOW);
         noTone(piezo);
 
-        delay(1000);
         return false;
     }
 
@@ -146,8 +145,6 @@ void loop() {
   if ((currentMillis-previousMillisSensor)>=intervalSensor){
       previousMillisSensor=currentMillis;
 
-      wifiCheck();
-
       sensors.requestTemperatures();
       tempC=sensors.getTempCByIndex(0);// Temperature from sensor
   
@@ -165,7 +162,9 @@ void loop() {
   // every 15 seconds
   if ((currentMillis-previousMillisLogging)>=intervalLogging){
       previousMillisLogging=currentMillis;
-  
+
+
+      wifiCheck(); //checks if disconnected
       // Sends temperature to thingspeak
       sendTemp(tempC);
   }
